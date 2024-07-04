@@ -1,8 +1,7 @@
 import { Component } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormsModule, FormControl } from '@angular/forms';
 import {
   lessEightCharacters,
-  moreEightCharacters,
   emptyField,
   oneTypeCharacters,
   twoTypesCharacters,
@@ -16,12 +15,14 @@ type MessageList = {
 @Component({
   selector: 'app-password',
   standalone: true,
-  imports: [ FormsModule ],
+  imports: [ ReactiveFormsModule, FormsModule ],
   templateUrl: './password.component.html',
   styleUrl: './password.component.scss'
 })
 export class PasswordComponent {
   public isShowPassword: boolean = false;
+  protected passwordValue: FormControl = new FormControl('');
+
   private defaultMessageList: MessageList[] = [
     {
       message: 'Easy',
@@ -37,7 +38,6 @@ export class PasswordComponent {
     },
   ];
   protected messageList: MessageList[] = this.defaultMessageList;
-  protected password: string = '';
 
   public handleShowPassword() {
     this.isShowPassword = !this.isShowPassword;
@@ -45,64 +45,32 @@ export class PasswordComponent {
 
   public handleEnterPassword() {
     // If the password is empty
-    if (emptyField(this.password)) {
+    if (emptyField(this.passwordValue.value)) {
       this.messageList = this.defaultMessageList;
     }
-    
     // If the password has less than 8 characters
-    if (lessEightCharacters(this.password)) {
-      this.messageList = this.messageList.map((item: MessageList) => {
-        return {
-          ...item,
-          className: 'red'
-        }
-      })
+    else if (lessEightCharacters(this.passwordValue.value)) {
+      this.messageList = this.messageList.map((item: MessageList) => (
+        { ...item, className: 'red' }
+      ))
+    }
+    // If the password has only letters/digits/symbols
+    else if( oneTypeCharacters(this.passwordValue.value) ) {
+      this.messageList = this.messageList.map((item: MessageList, ind: number) => (
+        ind === 0 ? { ...item, className: 'red' } : { ...item, className: '' }
+      ))
     } 
-    
-    // If the password has more than 7 characters
-    if (moreEightCharacters(this.password)) {
-
-      // If the password has only letters/digits/symbols
-      if( oneTypeCharacters(this.password) ) {
-        this.messageList = this.messageList.map((item: MessageList, ind: number) => {
-          if(ind == 0) {
-            return {
-              ...item,
-              className: 'red'
-            }
-          } else {
-            return {
-              ...item,
-              className: ''
-            }
-          };
-        })
-      } 
-      // If the password has only letters-digits/letters-symbols/digits-symbols
-      else if (twoTypesCharacters(this.password)) {
-        this.messageList = this.messageList.map((item: MessageList, ind: number) => {
-          if(ind == this.messageList.length -1) {
-            return {
-              ...item,
-              className: ''
-            }
-          } else {
-            return {
-              ...item,
-              className: 'yellow'
-            }
-          };
-        })
-      } 
-      // If the password has letters, symbols and numbers
-      else {
-        this.messageList = this.messageList.map((item: MessageList) => {
-          return {
-            ...item,
-            className: 'green'
-          }
-        })
-      }
+    // If the password has only letters-digits/letters-symbols/digits-symbols
+    else if (twoTypesCharacters(this.passwordValue.value)) {
+      this.messageList = this.messageList.map((item: MessageList, ind: number, arr: MessageList[]) => (
+        ind == arr.length -1 ? { ...item, className: '' } : { ...item, className: 'yellow' }
+      ))
+    } 
+    // If the password has letters, symbols and numbers
+    else {
+      this.messageList = this.messageList.map((item: MessageList) => (
+        { ...item, className: 'green' }
+      ))
     }
   }
 }

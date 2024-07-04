@@ -10,11 +10,6 @@ export const lessEightCharacters = (value: string): boolean => {
   return value.length < 8 && value.length !== 0
 };
 
-// If the password has more than 7 characters
-export const moreEightCharacters = (value: string): boolean => {
-  return value.length >= 8
-};
-
 // If the password has only letters/digits/symbols
 export const oneTypeCharacters = (value: string): boolean => {
   return !/\D/g.test(value) || !/\w/g.test(value) || !/[\d\W]/g.test(value)
